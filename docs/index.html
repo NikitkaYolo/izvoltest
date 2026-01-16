@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Панель управления</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Sticky Header -->
+    <header class="sticky-header" id="header">
+        <div class="header-content">
+            <button class="back-btn" id="backBtn" style="display: none;">
+                ←
+            </button>
+            <h1 class="header-title" id="headerTitle">Точки</h1>
+        </div>
+        <div class="breadcrumbs" id="breadcrumbs"></div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Screen: Locations -->
+        <div class="screen active" id="screenLocations">
+            <div class="user-info" id="userInfo"></div>
+            <div class="list-container" id="locationsList"></div>
+        </div>
+
+        <!-- Screen: Devices -->
+        <div class="screen" id="screenDevices">
+            <div class="list-container" id="devicesList"></div>
+        </div>
+
+        <!-- Screen: Items -->
+        <div class="screen" id="screenItems">
+            <div class="mode-switcher" id="modeSwitcher">
+                <button class="mode-btn active" data-mode="view">Просмотр</button>
+                <button class="mode-btn" data-mode="edit">Редактирование</button>
+                <button class="mode-btn" data-mode="archive">Архивирование</button>
+            </div>
+            <div class="list-container" id="itemsList"></div>
+            <button class="fab" id="addItemBtn" style="display: none;">➕</button>
+        </div>
+    </main>
+
+    <!-- Modal for Add/Edit Item -->
+    <div class="modal" id="itemModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Добавить позицию</h2>
+            <input type="text" id="itemNameInput" placeholder="Название позиции" maxlength="100">
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="modalCancel">Отмена</button>
+                <button class="btn btn-primary" id="modalSave">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Archive Confirmation -->
+    <div class="modal" id="archiveModal">
+        <div class="modal-content">
+            <h2>Архивировать позицию?</h2>
+            <p id="archiveItemName"></p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="archiveCancel">Отмена</button>
+                <button class="btn btn-danger" id="archiveConfirm">Архивировать</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
