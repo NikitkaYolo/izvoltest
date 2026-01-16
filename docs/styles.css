@@ -162,19 +162,29 @@ body {
     background-color: var(--tg-theme-secondary-bg-color);
     border-radius: 12px;
     margin: 8px 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.mode-switcher::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
 }
 
 .mode-btn {
     flex: 1;
-    padding: 10px 16px;
+    min-width: fit-content;
+    padding: 10px 12px;
     border: none;
     border-radius: 8px;
     background-color: transparent;
     color: var(--tg-theme-text-color);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
+    white-space: nowrap;
 }
 
 .mode-btn.active {
