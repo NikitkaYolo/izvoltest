@@ -200,11 +200,13 @@ function updateBreadcrumbs() {
 }
 
 // Обработчик кнопки "Назад"
-elements.backBtn.addEventListener('click', () => {
-    handleBack();
-});
+if (elements.backBtn) {
+    elements.backBtn.addEventListener('click', () => {
+        handleBack();
+    });
+}
 
-if (tg) {
+if (tg && tg.BackButton) {
     tg.BackButton.onClick(() => {
         handleBack();
     });
@@ -239,6 +241,7 @@ function loadLocations() {
 
 // Загрузка устройств
 function loadDevices() {
+    if (!elements.devicesList) return;
     elements.devicesList.innerHTML = '';
     
     const devices = appData.devices[state.currentLocation.id] || [];
@@ -272,6 +275,7 @@ function loadItems() {
 
 // Рендеринг позиций
 function renderItems(items) {
+    if (!elements.itemsList) return;
     if (items.length === 0) {
         elements.itemsList.innerHTML = '<div class="empty-state">Нет позиций</div>';
         return;
@@ -315,18 +319,24 @@ function renderItems(items) {
     });
 }
 
-// Переключение режимов
-const modeButtons = document.querySelectorAll('.mode-btn');
-modeButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const mode = btn.dataset.mode;
-        state.currentMode = mode;
-        updateModeButtons();
-        loadItems();
+// Переключение режимов (инициализация после загрузки DOM)
+let modeButtons = null;
+function initModeButtons() {
+    modeButtons = document.querySelectorAll('.mode-btn');
+    modeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const mode = btn.dataset.mode;
+            state.currentMode = mode;
+            updateModeButtons();
+            loadItems();
+        });
     });
-});
+}
 
 function updateModeButtons() {
+    if (!modeButtons) {
+        modeButtons = document.querySelectorAll('.mode-btn');
+    }
     modeButtons.forEach(btn => {
         if (btn.dataset.mode === state.currentMode) {
             btn.classList.add('active');
@@ -336,10 +346,12 @@ function updateModeButtons() {
     });
     
     // Показываем кнопку добавления только в режиме просмотра
-    if (state.currentMode === 'view') {
-        elements.addItemBtn.style.display = 'flex';
-    } else {
-        elements.addItemBtn.style.display = 'none';
+    if (elements.addItemBtn) {
+        if (state.currentMode === 'view') {
+            elements.addItemBtn.style.display = 'flex';
+        } else {
+            elements.addItemBtn.style.display = 'none';
+        }
     }
 }
 
@@ -351,20 +363,27 @@ const itemModal = {
     cancelBtn: document.getElementById('modalCancel'),
 };
 
-elements.addItemBtn.addEventListener('click', () => {
-    state.editingItemId = null;
-    itemModal.title.textContent = 'Добавить позицию';
-    itemModal.input.value = '';
-    itemModal.input.focus();
-    elements.itemModal.classList.add('active');
-});
+if (elements.addItemBtn) {
+    elements.addItemBtn.addEventListener('click', () => {
+        state.editingItemId = null;
+        if (itemModal.title) itemModal.title.textContent = 'Добавить позицию';
+        if (itemModal.input) {
+            itemModal.input.value = '';
+            itemModal.input.focus();
+        }
+        if (elements.itemModal) elements.itemModal.classList.add('active');
+    });
+}
 
-itemModal.cancelBtn.addEventListener('click', () => {
-    elements.itemModal.classList.remove('active');
-});
+if (itemModal.cancelBtn) {
+    itemModal.cancelBtn.addEventListener('click', () => {
+        if (elements.itemModal) elements.itemModal.classList.remove('active');
+    });
+}
 
-itemModal.saveBtn.addEventListener('click', () => {
-    const name = itemModal.input.value.trim();
+if (itemModal.saveBtn) {
+    itemModal.saveBtn.addEventListener('click', () => {
+        const name = itemModal.input ? itemModal.input.value.trim() : '';
     if (!name) {
         if (tg) {
             tg.showAlert('Введите название позиции');
@@ -403,9 +422,10 @@ itemModal.saveBtn.addEventListener('click', () => {
         }
     }
     
-    elements.itemModal.classList.remove('active');
-    loadItems();
-});
+        if (elements.itemModal) elements.itemModal.classList.remove('active');
+        loadItems();
+    });
+}
 
 function openEditModal(item) {
     state.editingItemId = item.id;
@@ -422,23 +442,27 @@ const archiveModal = {
     cancelBtn: document.getElementById('archiveCancel'),
 };
 
-archiveModal.cancelBtn.addEventListener('click', () => {
-    elements.archiveModal.classList.remove('active');
-});
+if (archiveModal.cancelBtn) {
+    archiveModal.cancelBtn.addEventListener('click', () => {
+        if (elements.archiveModal) elements.archiveModal.classList.remove('active');
+    });
+}
 
-archiveModal.confirmBtn.addEventListener('click', () => {
-    const items = appData.items[state.currentDevice.id] || [];
-    const item = items.find(i => i.id === state.archivingItemId);
-    if (item) {
-        item.archived = true;
-        saveData(appData);
-        if (tg) {
-            tg.showAlert('Позиция архивирована');
+if (archiveModal.confirmBtn) {
+    archiveModal.confirmBtn.addEventListener('click', () => {
+        const items = appData.items[state.currentDevice.id] || [];
+        const item = items.find(i => i.id === state.archivingItemId);
+        if (item) {
+            item.archived = true;
+            saveData(appData);
+            if (tg) {
+                tg.showAlert('Позиция архивирована');
+            }
         }
-    }
-    elements.archiveModal.classList.remove('active');
-    loadItems();
-});
+        if (elements.archiveModal) elements.archiveModal.classList.remove('active');
+        loadItems();
+    });
+}
 
 function openArchiveModal(item) {
     state.archivingItemId = item.id;
@@ -473,6 +497,22 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Инициализация при загрузке
-initUser();
-showScreen('locations');
+// Инициализация при загрузке DOM
+function initApp() {
+    // Проверка наличия необходимых элементов
+    if (!elements.locationsList || !elements.devicesList || !elements.itemsList) {
+        console.error('Не найдены необходимые DOM элементы');
+        return;
+    }
+    
+    initUser();
+    initModeButtons();
+    showScreen('locations');
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    // DOM уже загружен
+    initApp();
+}
